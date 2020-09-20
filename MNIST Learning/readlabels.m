@@ -1,6 +1,6 @@
 function labels = readlabels(labelfile)
 
-    flabels = fopen(labelfiles, 'r', 'b');
+    flabels = fopen(labelfile, 'r', 'b');
     header = fread(flabels, 1, 'int32');
     
     if header ~= 2049

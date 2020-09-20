@@ -17,7 +17,7 @@ function imgs = readimages(imagefile)
     
     for i = 1:numimages
         for y=1:rows
-            imgs(y,:,i) = fread(fimages, columns, 'uint8');
+            imgs(y,:,i) = fread(fimages, columns, 'uint8')/255;
             
         end
     end
