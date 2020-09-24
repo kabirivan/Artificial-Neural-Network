@@ -1,20 +1,25 @@
-%loading the images and labels
+%Cargar imagenes y etiquetas
 testimages=readimages('t10k-images-idx3-ubyte');
 testlabels=readlabels('t10k-labels-idx1-ubyte');
 
-%Number of images from thhe training set we want to work on
+%Numero de imagenes para probar
 %numtestimages=size(testimages,3);
-numtestimages=100;
-%1 is leakyrelu, 2 is sigmoid
+numtestimages=10;
+%1 es leakyrelu, 2 es sigmoide
 fun=1;
 
-%Number of nodes in input layer, outplayer and hidden layer
+%Numero de nodos de salida
 testoutputnodes=10;
 
 successtest=0;
    
     %Testingforward propagation 
     for i=1:numtestimages
+        
+        figure(i)
+        img = imresize(testimages(:,:,i), [227 227]);
+        imshow(img)
+        
         ytest=zeros(testoutputnodes,1);
         ytest(testlabels(i)+1,1)=1;
         for row=1:size(testimages,1)
@@ -24,24 +29,26 @@ successtest=0;
         end
         
         %Forward Propagation
-        %Input Layer
+        %Capa de entrada
         ztest(:,1)=winput*atestinput+b(:,1);
         atesth(:,1)=activation(ztest(:,1),fun,0);
-        %Hidden layers
+        %Capas escondidas
         if hlayers>1
             for l=2:hlayers
                 ztest(:,l)=wh(:,:,l-1)*atesth(:,l-1)+b(:,l);
                 atesth(:,l)=activation(ztest(:,l),fun,0);
             end
         end
-        %Output layer
+        %Capa de salida
         ztestoutput=woutput*atesth(:,hlayers)+boutput;
         atestoutput=activation(ztestoutput,fun,0);
         
-        successtest=successtest+[find(atestoutput==max(atestoutput))==(testlabels(i)+1)];
+        [val, idx] = max(atestoutput);
         
+        successtest=successtest+[find(atestoutput==max(atestoutput))==(testlabels(i)+1)];
+        responses(i,:) = [testlabels(i), idx-1]
     end
    
-    successtestrate=successtest/numtestimages
+    successtestrate = successtest/numtestimages
     
       
