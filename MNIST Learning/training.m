@@ -10,7 +10,7 @@ learningrate = 0.001;
 
 % Numero de imagenes del dataset MNIST
 %numImages = size(images,3);
-numImages = 100;
+numImages = 500;
 
 % 1 es leakyRELU, 2es sigmoide
 fun=1;
@@ -24,6 +24,8 @@ nodeshlayers=20;
 hlayers = 2;
 
 % Pesos iniciales de la capa de entrada
+% https://towardsdatascience.com/weight-initialization-techniques-in-neural-networks-26c649eb3b78
+
 winput = normrnd(0,sqrt(2/inputnodes),nodeshlayers,inputnodes);
 
 % Pesos iniciales de la capa escondida
@@ -33,12 +35,12 @@ wh = normrnd(0,sqrt(2/nodeshlayers),nodeshlayers,nodeshlayers,hlayers-1);
 woutput = normrnd(0,sqrt(2/nodeshlayers),outputnodes,nodeshlayers);
 
 % Inicializacion de las biases
+% Capa Escondida
 b = zeros(nodeshlayers,hlayers);
+% Capa de salida
 boutput = zeros(outputnodes,1);
 
-
-
-
+%Inicializacion de parametros
 j = 0
 success = 0;
 
@@ -47,9 +49,12 @@ success = 0;
 
 while abs(success)< 0.99
     j = j + 1;
+    
     % Inicializacion del grandiente y las neuronas de la capas escondidas
+    %BIAS
     deltab = zeros(nodeshlayers,hlayers);
     deltaboutput = zeros(outputnodes,1);
+    %PESOS
     deltawoutput = zeros(outputnodes,nodeshlayers);
     deltawh = zeros(nodeshlayers,nodeshlayers,hlayers-1);
     deltawinput = zeros(nodeshlayers,inputnodes);
@@ -82,14 +87,17 @@ while abs(success)< 0.99
                 ah(:,l)=activation(z(:,l),fun,0);
             end
         end
-        %Output layer
+        
+        %Capa de salida
         zoutput=woutput*ah(:,hlayers)+boutput;
         aoutput=activation(zoutput,fun,0);
         
         %Backpropagation
-        %Compute the gradient of the output layer
+        
+        %Calcular el gradiente de la capa de salida
         deltaoutput=activation(zoutput,fun,1).*(aoutput-y);
-        %Last hidden layer
+        
+        %Ultima capa escondida
         deltah(:,hlayers)=activation(z(:,hlayers),fun,1).*(woutput.')*deltaoutput;
         %If more than one hidden layer, backpropagate on these
         if hlayers>1
@@ -98,19 +106,20 @@ while abs(success)< 0.99
             end
         end
         
-        %Correct weights and biases matrices using the gradient of the cost
+        %Calculamos los pesos y los bias de acuerdo al descendo de gradiente
         %function or deltas
         deltawoutput=deltawoutput+deltaoutput*(ah(:,hlayers).');
         deltaboutput=deltaboutput+deltaoutput;
         
-        %hidden layers
+        %Capas escondidas
         if hlayers>1
             for prop=2:hlayers
                 deltawh(:,:,prop-1)=deltawh(:,:,prop-1)+deltah(:,prop)*((ah(:,prop-1)).');
                 deltab(:,prop)=deltab(:,prop)+deltah(:,prop);
             end
         end
-        %first hidden layer
+        
+        %Capa de entrada
         deltab(:,1)=deltab(:,1)+deltah(:,1);
         deltawinput=deltawinput+deltah(:,1)*ainput.';
         
